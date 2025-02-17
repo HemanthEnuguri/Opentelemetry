@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"go.opentelemetry.io/otel"
 )
 
 // Example API request function with structured logging
@@ -24,6 +27,30 @@ func makeAPIRequest(ctx context.Context, url string) error {
 	defer resp.Body.Close()
 
 	logger.Info("API request completed", "url", url, "status", resp.StatusCode)
+
+	//return nil
+	return resp.StatusCode
+}
+
+// API request function with OpenTelemetry tracing
+func makeAPIRequest(ctx context.Context, url string) error {
+	tracer := otel.Tracer("project-vending-module")
+
+	ctx, span := tracer.Start(ctx, "API Request")
+	defer span.End()
+
+	client := http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(url)
+
+	if err != nil {
+		span.RecordError(err)
+		fmt.Println("API request failed:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	span.SetAttributes("http.status_code", resp.StatusCode)
+	fmt.Println("API request successful:", resp.StatusCode)
 
 	return nil
 }
