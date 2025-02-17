@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
+
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Example API request function with structured logging
@@ -29,10 +28,9 @@ func makeAPIRequest(ctx context.Context, url string) error {
 
 	logger.Info("API request completed", "url", url, "status", resp.StatusCode)
 
-	return nil
+	//return nil
+	return resp.StatusCode
 }
-
-
 
 // API request function with OpenTelemetry tracing
 func makeAPIRequest(ctx context.Context, url string) error {
@@ -56,7 +54,6 @@ func makeAPIRequest(ctx context.Context, url string) error {
 
 	return nil
 }
-
 
 func main() {
 	ctx := context.Background()
